@@ -4,7 +4,7 @@ import nock from 'nock';
 import fs from 'mz/fs';
 import pathlib from 'path';
 import os from 'os';
-import pageLoader, { makeFileNameFromURL } from '..';
+import pageLoader, { makeFileNameFromURL } from '../src';
 
 axios.defaults.adapter = httpAdapter;
 nock.disableNetConnect();
