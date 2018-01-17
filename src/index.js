@@ -3,6 +3,8 @@ import url from 'url';
 import axios from 'axios';
 import fs from 'mz/fs';
 
+const errorHandling = error => console.log(error.message);
+
 export const makeFileNameFromURL = (link) => {
   const { host, path, hash } = url.parse(link);
   const newstr = [host, path, hash].join('').replace(/[^a-zA-Z]/gi, '-');
@@ -19,5 +21,6 @@ export default (link, pathToDir = './') => {
       }
       return response.data;
     })
-    .then(html => fs.writeFile(pathToFile, html, 'utf8'));
+    .then(html => fs.writeFile(pathToFile, html, 'utf8'))
+    .catch(error => errorHandling(error));
 };

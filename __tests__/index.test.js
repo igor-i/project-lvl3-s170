@@ -8,10 +8,10 @@ import pageLoader, { makeFileNameFromURL } from '../src';
 
 beforeAll(() => {
   axios.defaults.adapter = httpAdapter;
-  return nock.disableNetConnect();
+  nock.disableNetConnect();
 });
 
-test('#the page should load successfully into the file', () => {
+test('#the page should load successfully into the file', async () => {
   const host = 'http://www.example.com';
   const status = 200;
   const body = 'Hello world';
@@ -21,43 +21,39 @@ test('#the page should load successfully into the file', () => {
 
   nock(host).get('/').reply(status, body);
 
-  expect.assertions(1);
-
-  return pageLoader(host, tempDir)
-    .then(() => fs.readFile(pathToFile, 'utf8'))
-    .then(data => expect(data).toBe(body));
+  await pageLoader(host, tempDir);
+  const data = await fs.readFile(pathToFile, 'utf8');
+  expect(data).toBe(body);
 });
 
-test('#the page load should fails (Request failed with status code 404)', () => {
+test('#the page load should fails (Request failed with status code 404)', async () => {
   const host = 'http://www.example.com';
   const status = 404;
-  const tempDir = fs.mkdtempSync(os.tmpdir());
+  const tempDir = fs.mkdtempSync(pathlib.join(os.tmpdir(), 'foo-'));
 
   nock(host).get('/').reply(status);
 
-  expect.assertions(1);
-
-  return pageLoader(host, tempDir)
-    .catch((e) => {
-      expect(e.message).toMatch('Request failed with status code 404');
-    });
+  try {
+    await pageLoader(host, tempDir);
+  } catch (e) {
+    expect(e.message).toMatch('Request failed with status code 404');
+  }
 });
 
-test('#the page save into the file should fails (ENOENT: no such file or directory)', () => {
+test('#the page save into the file should fails (ENOENT: no such file or directory)', async () => {
   const host = 'http://www.example.com';
   const status = 200;
   const body = 'Hello world';
-  const tempDir = fs.mkdtempSync(os.tmpdir());
+  const tempDir = fs.mkdtempSync(pathlib.join(os.tmpdir(), 'foo-'));
   const fileName = 'wrong-file-name.wrong';
   const pathToFile = pathlib.resolve(tempDir, fileName);
 
   nock(host).get('/').reply(status, body);
 
-  expect.assertions(1);
-
-  return pageLoader(host, tempDir)
-    .then(() => fs.readFile(pathToFile, 'utf8'))
-    .catch((e) => {
-      expect(e.message).toMatch('ENOENT: no such file or directory');
-    });
+  try {
+    await pageLoader(host, tempDir);
+    await fs.readFile(pathToFile, 'utf8');
+  } catch (e) {
+    expect(e.message).toMatch('ENOENT: no such file or directory');
+  }
 });
