@@ -6,14 +6,16 @@ import pathlib from 'path';
 import os from 'os';
 import pageLoader, { makeFileNameFromURL } from '../src';
 
-axios.defaults.adapter = httpAdapter;
-nock.disableNetConnect();
+beforeAll(() => {
+  axios.defaults.adapter = httpAdapter;
+  return nock.disableNetConnect();
+});
 
 test('#the page should load successfully into the file', () => {
   const host = 'http://www.example.com';
   const status = 200;
   const body = 'Hello world';
-  const tempDir = fs.mkdtempSync(os.tmpdir());
+  const tempDir = fs.mkdtempSync(pathlib.join(os.tmpdir(), 'foo-'));
   const fileName = makeFileNameFromURL(host);
   const pathToFile = pathlib.resolve(tempDir, fileName);
 
