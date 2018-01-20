@@ -1,6 +1,6 @@
 {
   "name": "igor-i-page-loader",
-  "version": "0.0.1-a",
+  "version": "0.2.0",
   "description": "This is a Level 3 project in Hexlet.io. A command line utility that downloads a page from the network and puts it in the specified folder (by default to the program's start directory).",
   "main": "dist/index.js",
   "bin": {
@@ -28,7 +28,9 @@
   "homepage": "https://github.com/igor-i/project-lvl3-s170#readme",
   "dependencies": {
     "axios": "^0.17.1",
+    "cheerio": "^1.0.0-rc.2",
     "commander": "^2.13.0",
+    "lodash": "^4.17.4",
     "mz": "^2.7.0"
   },
   "devDependencies": {
