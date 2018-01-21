@@ -5,15 +5,12 @@ import fs from 'mz/fs';
 import cheerio from 'cheerio';
 import _ from 'lodash';
 import debug from 'debug';
+import errorHandling from './errorHandler';
 
 const log = debug('page-loader:');
+
 const appName = 'Page Loader';
 log('booting %o', appName);
-
-const errorHandling = (error) => {
-  log('task completed with error %o', error.message);
-  console.log(`ERROR: ${error.message}`);
-};
 
 const makeNameFromURL = (link) => {
   const { host, path, hash } = urllib.parse(link);
@@ -122,7 +119,11 @@ const pageLoader = (link, pathToDir = './') => {
     .then(html => changeHtml(srcDirName, html))
     .then(newHtml => writeNewHtml(pathToHtmlFile, newHtml))
     .then(() => log('task completed successfully'))
-    .catch(error => errorHandling(error));
+    .catch((error) => {
+      const errorMessage = errorHandling(error);
+      log('task completed with error, %o', errorMessage);
+      return Promise.reject(error);
+    });
 };
 
 export { makeFileNameFromURL, makeDirNameFromURL, getNewSrcLink };

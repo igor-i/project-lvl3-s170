@@ -10,6 +10,9 @@ commander
   .option('-o, --output [path]', 'Output file path [path]')
   .arguments('<url>')
   .action((url, option) => {
-    pageLoader(url, option.output);
+    pageLoader(url, option.output)
+      .catch(() => {
+        process.exit(1);
+      });
   })
   .parse(process.argv);

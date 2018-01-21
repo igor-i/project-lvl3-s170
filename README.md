@@ -14,6 +14,12 @@ A command line utility that downloads a page from the network and puts it in the
 make install
 ```
 
+or from NPM
+
+```
+npm install -g igor-i-page-loader
+```
+
 ## Run
 
 ```

@@ -82,8 +82,8 @@ test('#the page save into the file should fails (ENOENT: no such file or directo
   const host = 'http://www.example.com';
   const status = 200;
   const body = 'Hello world';
-  const tempDir = fs.mkdtempSync(pathlib.join(os.tmpdir(), 'foo-'));
-  const fileName = 'wrong-file-name.wrong';
+  const tempDir = pathlib.join(os.tmpdir(), 'foo-');
+  const fileName = makeFileNameFromURL(host, '.html');
   const pathToFile = pathlib.resolve(tempDir, fileName);
 
   nock(host).get('/').reply(status, body);
