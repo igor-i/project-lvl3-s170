@@ -73,6 +73,7 @@ test('#the page load should fails (Request failed with status code 404)', async 
 
   try {
     await pageLoader(host, tempDir);
+    expect(false).toBe(true);
   } catch (e) {
     expect(e.message).toMatch('Request failed with status code 404');
   }
@@ -91,6 +92,7 @@ test('#the page save into the file should fails (ENOENT: no such file or directo
   try {
     await pageLoader(host, tempDir);
     await fs.readFile(pathToFile, 'utf8');
+    expect(false).toBe(true);
   } catch (e) {
     expect(e.message).toMatch('ENOENT: no such file or directory');
   }

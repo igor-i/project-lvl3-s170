@@ -5,12 +5,10 @@ import fs from 'mz/fs';
 import cheerio from 'cheerio';
 import _ from 'lodash';
 import debug from 'debug';
+import Listr from 'listr';
 import errorHandling from './errorHandler';
 
 const log = debug('page-loader:');
-
-const appName = 'Page Loader';
-log('booting %o', appName);
 
 const makeNameFromURL = (link) => {
   const { host, path, hash } = urllib.parse(link);
@@ -55,23 +53,38 @@ const getSrcLinks = (html) => {
 const loadAndWriteSrcFiles = (srcLinks, pathToSrcDir, url, html) => {
   log('start asynchronous loading and writing sources files');
   return axios.all(srcLinks.map((srcLink) => {
-    const { host } = urllib.parse(srcLink);
-    if (host) {
-      log('external reference %o discarded', host);
-      return true;
-    }
-    const pathname = `${url.pathname}${srcLink}`;
-    const srcUrl = urllib.format({ ...url, pathname });
-    const axiosParams = { method: 'get', url: srcUrl, responseType: 'stream' };
-    log('loading a file %o', srcLink);
-    return axios.all([makeFileNameFromURL(srcLink), axios(axiosParams)])
-      .then(axios.spread((newFileName, response) => {
-        log('successfully writed file into %o', newFileName);
-        return response.data.pipe(fs.createWriteStream(pathlib.resolve(pathToSrcDir, newFileName)));
-      }));
+    const tasks = new Listr([{
+      title: `Loading a source ${srcLink}`,
+      skip: () => {
+        const { host } = urllib.parse(srcLink);
+        if (host) {
+          log('external reference %o discarded', host);
+          return `external reference '${host}' discarded`;
+        }
+        return false;
+      },
+      task: () => {
+        const pathname = `${url.pathname}${srcLink}`;
+        const srcUrl = urllib.format({ ...url, pathname });
+        const axiosParams = { method: 'get', url: srcUrl, responseType: 'stream' };
+        log('loading a file %o', srcLink);
+        return axios.all([makeFileNameFromURL(srcLink), axios(axiosParams)])
+          .then(axios.spread((newFileName, response) => {
+            log('successfully writed file into %o', newFileName);
+            response.data.pipe(fs.createWriteStream(pathlib.resolve(pathToSrcDir, newFileName)));
+          }));
+      },
+    }]);
+
+    return tasks.run()
+      .catch((error) => {
+        const errorMessage = errorHandling(error);
+        log('failed to write file, %o', errorMessage);
+        return Promise.resolve();
+      });
   }))
     .then(() => {
-      log('end asynchronous loading and writing source files');
+      log('ending asynchronous loading and writing source files');
       return html;
     });
 };

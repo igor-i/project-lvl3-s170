@@ -5,12 +5,4 @@ const getErrorMessage = (err) => {
   return (err.path) ? `ERROR: ${str} [${err.path}]` : `ERROR: ${str}`;
 };
 
-export default (error) => {
-  const errorMessage = getErrorMessage(error);
-  console.error(errorMessage);
-  if (error.config) {
-    console.error(error.config);
-  }
-
-  return errorMessage;
-};
+export default error => getErrorMessage(error);
